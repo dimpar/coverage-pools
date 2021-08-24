@@ -20,7 +20,7 @@ on:
         default: "main"
 
 jobs:
-  contracts-build-and-test:
+  contracts-deployment-testnet:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,12 +31,6 @@ jobs:
       - name: Build contracts
         run: yarn build
 
-  contracts-deployment-testnet:
-    needs: [contracts-build-and-test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
       - name: Deploy contracts
         env:
           CHAIN_API_URL: ${{ secrets.KEEP_TEST_ETH_HOSTNAME_HTTP }}
@@ -44,7 +38,6 @@ jobs:
         run: yarn deploy --network ropsten
 
       - name: Push contracts to Tenderly
-        if: github.event.inputs.environment == 'ropsten'
         uses: keep-network/tenderly-push-action@v1
         continue-on-error: true
         with:
