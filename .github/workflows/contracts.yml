@@ -36,14 +36,6 @@ jobs:
       - name: Build contracts
         run: yarn build
 
-      - name: Run tests
-        run: yarn test
-
-      - name: Run system tests
-        env:
-          FORKING_URL: ${{ secrets.MAINNET_ETH_HOSTNAME }}
-        run: yarn test:system
-
   contracts-deployment-dry-run:
     runs-on: ubuntu-latest
     steps:
@@ -62,52 +54,15 @@ jobs:
 
   contracts-deployment-testnet:
     needs: [contracts-build-and-test]
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Load environment variables
-        uses: keep-network/ci/actions/load-env-variables@v1
-        with:
-          environment: ${{ github.event.inputs.environment }}
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "14.x"
-          cache: "yarn"
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Get upstream packages' versions
-        uses: keep-network/ci/actions/upstream-builds-query@v1
-        id: upstream-builds-query
-        with:
-          upstream-builds: ${{ github.event.inputs.upstream_builds }}
-          query: |
-            keep-core-contracts-version = github.com/keep-network/keep-core/solidity#version
-            tbtc-contracts-version = github.com/keep-network/tbtc/solidity#version
-
-      - name: Resolve latest contracts
-        run: |
-          yarn add \
-            @keep-network/keep-core@${{ steps.upstream-builds-query.outputs.keep-core-contracts-version }} \
-            @keep-network/tbtc@${{ steps.upstream-builds-query.outputs.tbtc-contracts-version }}
 
       - name: Deploy contracts
         env:
           CHAIN_API_URL: ${{ secrets.KEEP_TEST_ETH_HOSTNAME_HTTP }}
           CONTRACT_OWNER_ACCOUNT_PRIVATE_KEY: ${{ secrets.KEEP_TEST_ETH_CONTRACT_OWNER_PRIVATE_KEY }}
-        run: yarn deploy --network ${{ github.event.inputs.environment }}
-
-      - name: Bump up package version
-        id: npm-version-bump
-        uses: keep-network/npm-version-bump@v2
-        with:
-          environment: ${{ github.event.inputs.environment }}
-          branch: ${{ github.ref }}
-          commit: ${{ github.sha }}
+        run: yarn deploy --network ropsten
 
       - name: Push contracts to Tenderly
         if: github.event.inputs.environment == 'ropsten'
@@ -116,74 +71,7 @@ jobs:
         with:
           tenderly-token: ${{ secrets.TENDERLY_TOKEN }}
           tenderly-project: thesis/keep-test
-          eth-network-id: ${{ env.NETWORK_ID }}
+          eth-network-id: "3"
           github-project-name: coverage-pools
           version-tag: ${{ steps.npm-version-bump.outputs.version }}
 
-      - name: Publish to npm
-        run: |
-          echo //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }} > .npmrc
-          npm publish --access=public --network=${{ github.event.inputs.environment }}
-
-      - name: Notify CI about completion of the workflow
-        uses: keep-network/ci/actions/notify-workflow-completed@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
-        with:
-          module: "github.com/keep-network/coverage-pools"
-          url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          environment: ${{ github.event.inputs.environment }}
-          upstream_builds: ${{ github.event.inputs.upstream_builds }}
-          upstream_ref: ${{ github.event.inputs.upstream_ref }}
-          version: ${{ steps.npm-version-bump.outputs.version }}
-
-  contracts-lint:
-    runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_dispatch'
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "14.x"
-          cache: "yarn"
-
-      - name: Install dependencies
-        run: yarn install
-
-      - name: Lint
-        run: yarn lint
-
-  contracts-slither:
-    runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_dispatch'
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "14.x"
-          cache: "yarn"
-
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.8.5
-
-      - name: Install Solidity
-        env:
-          SOLC_VERSION: 0.8.5 # according to solidity.version in hardhat.config.ts
-        run: |
-          pip3 install solc-select
-          solc-select install $SOLC_VERSION
-          solc-select use $SOLC_VERSION
-
-      - name: Install Slither
-        env:
-          SLITHER_VERSION: 0.8.0
-        run: pip3 install slither-analyzer==$SLITHER_VERSION
-
-      - name: Install dependencies
-        run: yarn install
-
-      - name: Run Slither
-        run: slither .

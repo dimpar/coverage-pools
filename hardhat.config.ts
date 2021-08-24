@@ -7,6 +7,7 @@ import "@nomiclabs/hardhat-ethers"
 import "hardhat-gas-reporter"
 import "hardhat-deploy"
 import "solidity-coverage"
+import '@tenderly/hardhat-tenderly'
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -39,13 +40,15 @@ const config: HardhatUserConfig = {
       tags: ["local"],
     },
     ropsten: {
-      url: process.env.CHAIN_API_URL || "",
+      url: "https://ropsten.infura.io/v3/9556716fcc164f2a8a7e5f3a5f7d4a54",
       chainId: 3,
-      accounts: process.env.CONTRACT_OWNER_ACCOUNT_PRIVATE_KEY
-        ? [process.env.CONTRACT_OWNER_ACCOUNT_PRIVATE_KEY]
-        : undefined,
+      accounts: ['0x65d8823327f50a169f4c4430f427586038cd059c2f2a168e35be465be0e6a764'],
     },
   },
+  tenderly: {
+		username: "dimpar",
+		project: "hardhat-cov-pool"
+	},
   // // Define local networks configuration file path to load networks from the file.
   // localNetworksConfig: "./.hardhat/networks.ts",
   external: {

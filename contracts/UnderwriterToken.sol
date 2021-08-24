@@ -28,7 +28,7 @@ import "@thesis/solidity-contracts/contracts/token/ERC20WithPermit.sol";
 ///         permit function, as specified in EIP2612 standard, paying gas fees,
 ///         and possibly performing other actions in the same transaction.
 contract UnderwriterToken is ERC20WithPermit {
-    constructor(string memory _name, string memory _symbol)
-        ERC20WithPermit(_name, _symbol)
+    constructor(string memory _name1, string memory _symbol)
+        ERC20WithPermit(_name1, _symbol)
     {}
 }

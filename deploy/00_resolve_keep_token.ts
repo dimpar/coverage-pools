@@ -2,27 +2,28 @@ import { HardhatRuntimeEnvironment } from "hardhat/types"
 import { DeployFunction } from "hardhat-deploy/types"
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { getNamedAccounts, deployments, helpers } = hre
-  const { log } = deployments
+  const { getNamedAccounts, deployments } = hre
   const { deployer } = await getNamedAccounts()
 
-  const KeepToken = await deployments.getOrNull("KeepToken")
+  const underwriterToken = await deployments.deploy("UnderwriterToken", {
+    from: deployer,
+    args: ["covKEEP underwriter token", "covKEEP"],
+    log: true,
+  })
 
-  if (KeepToken && helpers.address.isValid(KeepToken.address)) {
-    log(`using external KeepToken at ${KeepToken.address}`)
-  } else if (hre.network.name !== "hardhat") {
-    throw new Error("deployed KeepToken contract not found")
-  } else {
-    log(`deploying KeepToken stub`)
+  await hre.tenderly.persistArtifacts({
+    name: "UnderwriterToken",
+    address: underwriterToken.address
+  });
+  
+  await hre.tenderly.verify({
+    name: "UnderwriterToken",
+    address: underwriterToken.address,
+  })
 
-    await deployments.deploy("KeepToken", {
-      contract: "TestToken",
-      from: deployer,
-      log: true,
-    })
-  }
+
 }
 
 export default func
 
-func.tags = ["KeepToken"]
+func.tags = ["UnderwriterToken"]
