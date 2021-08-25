@@ -5,25 +5,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { getNamedAccounts, deployments } = hre
   const { deployer } = await getNamedAccounts()
 
-  const keepToken = await deployments.deploy("KeepToken", {
-    contract: "TestToken",
+  await deployments.deploy("UnderwriterToken", {
     from: deployer,
+    args: ["covKEEP underwriter token", "covKEEP"],
     log: true,
   })
-
-  await hre.tenderly.persistArtifacts({
-    name: "KeepToken",
-    address: keepToken.address
-  });
-  
-  await hre.tenderly.verify({
-    name: "KeepToken",
-    address: keepToken.address,
-  })
-
-
 }
 
 export default func
 
-func.tags = ["KeepToken"]
+func.tags = ["UnderwriterToken"]
