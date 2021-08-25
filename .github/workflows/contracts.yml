@@ -30,6 +30,12 @@ jobs:
 
       - name: Build contracts
         run: yarn build
+      
+      - name: Resolve latest contracts
+        run: |
+          yarn add \
+            @keep-network/keep-core \
+            @keep-network/tbtc
 
       - name: Deploy contracts
         env:
