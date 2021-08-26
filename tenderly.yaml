@@ -1,5 +1,0 @@
-account_id: 005fc4b0-98de-4a39-adae-293795dc915f
-projects:
-  dimpar/cov-pool-test:
-    networks:
-      - "3" # ropsten

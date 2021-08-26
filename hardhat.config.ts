@@ -47,7 +47,7 @@ const config: HardhatUserConfig = {
   },
   tenderly: {
 		username: "dimpar",
-		project: "hardhat-cov-pool"
+		project: "hardhat-coverage-pool-1"
 	},
   // // Define local networks configuration file path to load networks from the file.
   // localNetworksConfig: "./.hardhat/networks.ts",
