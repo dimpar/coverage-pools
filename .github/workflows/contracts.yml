@@ -37,7 +37,7 @@ jobs:
             @keep-network/keep-core \
             @keep-network/tbtc
 
-      - name: Deploy contracts
+      - name: Configure tenderly
         env:
           TENDERLY_API_KEY: ${{ secrets.TENDERLY_API_KEY }}
         run: ./config_tenderly.sh
