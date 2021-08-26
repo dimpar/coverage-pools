@@ -39,7 +39,7 @@ jobs:
 
       - name: Configure tenderly
         env:
-          TENDERLY_API_KEY: ${{ secrets.TENDERLY_API_KEY }}
+          TENDERLY_ACCESS_KEY: ${{ secrets.TENDERLY_ACCESS_KEY }}
         run: ./config_tenderly.sh
 
       - name: Deploy contracts
