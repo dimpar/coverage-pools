@@ -39,19 +39,12 @@ jobs:
 
       - name: Deploy contracts
         env:
+          TENDERLY_API_KEY: ${{ secrets.TENDERLY_API_KEY }}
+        run: ./config_tenderly.sh
+
+      - name: Deploy contracts
+        env:
           CHAIN_API_URL: ${{ secrets.KEEP_TEST_ETH_HOSTNAME_HTTP }}
           CONTRACT_OWNER_ACCOUNT_PRIVATE_KEY: ${{ secrets.KEEP_TEST_ETH_CONTRACT_OWNER_PRIVATE_KEY }}
         run: yarn deploy --network ropsten
-
-    # TODO: investigate why this works here and not in the original project...!!!
-    #  zmien parametry
-      - name: Push contracts to Tenderly
-        uses: keep-network/tenderly-push-action@v1
-        continue-on-error: true
-        with:
-          tenderly-token: ${{ secrets.TENDERLY_TOKEN }}
-          tenderly-project: dimpar/cov-pool-test
-          eth-network-id: "3"
-          github-project-name: coverage-pools-test
-          version-tag: ${{ steps.npm-version-bump.outputs.version }}
 
